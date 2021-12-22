@@ -1,5 +1,6 @@
 {
   "$schema": "https://vega.github.io/schema/vega/v5.21.0.json",
+  "title": "Population for the selected decade",
   "width": 500,
   "height": 250,
   "padding": 5,
@@ -74,8 +75,8 @@
   ],
 
   "axes": [
-    { "orient": "bottom", "scale": "xscale" },
-    { "orient": "left", "scale": "yscale" }
+    { "orient": "bottom", "scale": "xscale", "title": "Age" },
+    { "orient": "left", "scale": "yscale", "title": "People" }
   ],
 
   "marks": [
