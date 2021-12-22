@@ -1,5 +1,5 @@
 {
-  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "$schema": "https://vega.github.io/schema/vega/v5.21.0.json",
   "width": 500,
   "height": 250,
   "padding": 5,
@@ -23,6 +23,19 @@
           "groupby": ["age"],
           "ops": ["sum"],
           "as": ["aggregatedPeople"]
+        }
+      ]
+    },
+    {
+      "name": "maxPeople",
+      "source": "aggregated",
+      "transform": [
+        {
+          "type": "aggregate",
+          "fields": ["aggregatedPeople"],
+          "groupby": ["year"],
+          "ops": ["max"],
+          "as": ["max_aggregatedPeople"]
         }
       ]
     }
@@ -75,12 +88,17 @@
           "x": { "scale": "xscale", "field": "age" },
           "width": { "value": 20 },
           "y": { "scale": "yscale", "field": "aggregatedPeople" },
-          "y2": { "scale": "yscale", "value": 0 }
+          "y2": { "scale": "yscale", "value": 0 },
+          "fillOpacity": { "value": 1 }
+        },
+        "hover": {
+          "fillOpacity": { "value": 0.5 }
         }
       }
     },
     {
       "type": "text",
+      "from": { "data": "aggregated" },
       "encode": {
         "enter": {
           "align": { "value": "center" },
@@ -92,7 +110,7 @@
           "y": { "scale": "yscale", "field": "aggregatedPeople", "offset": -2 },
           "text": { "signal": "tooltip.aggregatedPeople" },
           "fillOpacity": [
-            { "test": "datum === tooltip", "value": 0 },
+            { "test": "datum.age !== tooltip.age", "value": 0 },
             { "value": 1 }
           ]
         }
