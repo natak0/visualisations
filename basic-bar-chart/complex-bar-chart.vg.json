@@ -1,0 +1,102 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "width": 500,
+  "height": 250,
+  "padding": 5,
+
+  "data": [
+    {
+      "name": "population",
+      "url": "https://vega.github.io/vega-datasets/data/population.json"
+    },
+    {
+      "name": "aggregated",
+      "source": "population",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.year === decade"
+        },
+        {
+          "type": "aggregate",
+          "fields": ["people"],
+          "groupby": ["age"],
+          "ops": ["sum"],
+          "as": ["aggregatedPeople"]
+        }
+      ]
+    }
+  ],
+
+  "signals": [
+    {
+      "name": "tooltip",
+      "value": {},
+      "on": [
+        { "events": "rect:mouseover", "update": "datum" },
+        { "events": "rect:mouseout", "update": "{}" }
+      ]
+    },
+    {
+      "name": "decade",
+      "value": 1910,
+      "bind": { "input": "range", "min": 1850, "max": 2000, "step": 10 }
+    }
+  ],
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "linear",
+      "domain": [0, 100],
+      "range": "width",
+      "padding": 5
+    },
+    {
+      "name": "yscale",
+      "type": "linear",
+      "domain": { "data": "aggregated", "field": "aggregatedPeople" },
+      "range": "height",
+      "round": true
+    }
+  ],
+
+  "axes": [
+    { "orient": "bottom", "scale": "xscale" },
+    { "orient": "left", "scale": "yscale" }
+  ],
+
+  "marks": [
+    {
+      "type": "rect",
+      "name": "peopleBars",
+      "from": { "data": "aggregated" },
+      "encode": {
+        "update": {
+          "x": { "scale": "xscale", "field": "age" },
+          "width": { "value": 20 },
+          "y": { "scale": "yscale", "field": "aggregatedPeople" },
+          "y2": { "scale": "yscale", "value": 0 }
+        }
+      }
+    },
+    {
+      "type": "text",
+      "encode": {
+        "enter": {
+          "align": { "value": "center" },
+          "baseline": { "value": "bottom" },
+          "fill": { "value": "#333" }
+        },
+        "update": {
+          "x": { "scale": "xscale", "field": "age", "band": 0.5 },
+          "y": { "scale": "yscale", "field": "aggregatedPeople", "offset": -2 },
+          "text": { "signal": "tooltip.aggregatedPeople" },
+          "fillOpacity": [
+            { "test": "datum === tooltip", "value": 0 },
+            { "value": 1 }
+          ]
+        }
+      }
+    }
+  ]
+}
