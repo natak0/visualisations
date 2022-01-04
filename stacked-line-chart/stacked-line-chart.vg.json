@@ -1,0 +1,121 @@
+{
+  "$schema": "https://vega.github.io/schema/vega/v5.json",
+  "description": "A basic stacked line chart example.",
+  "width": 500,
+  "height": 200,
+  "padding": 5,
+
+  "signals": [
+    {
+      "name": "decade",
+      "value": 1910,
+      "bind": { "input": "range", "min": 1850, "max": 2000, "step": 10 }
+    },{
+      "name": "sortOrder", "value": "ascending",
+      "bind": {"input": "radio", "options": ["ascending", "descending"]}
+    }
+  ],
+
+  "data": [
+    {
+      "name": "population",
+      "url": "https://vega.github.io/vega-datasets/data/population.json"
+    },
+
+    {
+      "name": "aggregated",
+      "source": "population",
+      "transform": [
+        {
+          "type": "filter",
+          "expr": "datum.year === decade"
+        },
+        { "type": "aggregate", "groupby": ["age", "sex", "people"] },
+        {
+          "type": "stack",
+          "groupby": ["age"], "field": "people",
+          "sort": {"field": "sex",
+            "order": {"signal": "sortOrder"}
+          }
+        }
+      ]
+    }
+  ],
+
+  "scales": [
+    {
+      "name": "xscale",
+      "type": "point",
+      "range": "width",
+      "domain": { "data": "aggregated", "field": "age" }
+    },
+    {
+      "name": "yscale",
+      "type": "linear",
+      "range": "height",
+      "nice": true,
+      "zero": true,
+      "domain": { "data": "aggregated", "field": "y1" }
+    },
+    {
+      "name": "color",
+      "type": "ordinal",
+      "range": "category",
+      "domain": { "data": "aggregated", "field": "sex" }
+    }
+  ],
+
+  "axes": [
+    { "orient": "bottom", "scale": "xscale", "title": "Age","zindex": 1 },
+    { "orient": "left", "scale": "yscale", "title": "Population","zindex": 1 }
+  ],
+  "legends": [
+    {
+      "stroke": "color",
+      "title": "Sex",
+      "padding": 4,
+      "encode": {
+        "symbols": {
+          "enter": {
+            "strokeWidth": { "value": 2 },
+            "size": { "value": 50 }
+          }
+        }
+      }
+    }
+  ],
+
+  "marks": [
+    {
+      "type": "group",
+      "from": {
+        "facet": {
+          "name": "series",
+          "data": "aggregated",
+          "groupby": "sex"
+        }
+      },
+      "marks": [
+        {
+          "type": "area",
+          "from": { "data": "series" },
+          "encode": {
+            "enter": {
+              "interpolate": {"value": "monotone"},
+              "x": { "scale": "xscale", "field": "age" }
+            },
+            "update": {
+              "y": { "scale": "yscale", "field": "y0" },
+              "y2": { "scale": "yscale", "field": "y1" },
+              "fill": { "scale": "color", "field": "sex" },
+              "fillOpacity": {"value": 1}
+            },
+            "hover": {
+              "fillOpacity": {"value": 0.5}
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
